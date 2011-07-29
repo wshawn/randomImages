@@ -1,1 +1,39 @@
-This file was created by JetBrains PhpStorm 2.1.2 for binding GitHub repository
+Purpose: to access a user declared folder, select an image and display it
+
+Requirements: user must supply folder name in snippet call
+         use an image as a random img placed into the page located in the root of the site might be accessed via:
+         [[randomImages?folder=`img/blue/random`]] or [[randomImages?folder=`img/blue/random`&mode=`img`]]
+
+         use image as the background of an HTML Element
+         <div id="header" [[randomImages?folder=`img/blue/random`&mode=`background`&bgPosition=`bottom left`]]>
+
+         use a MODX chunk as a template:
+         [[randomImages?folder=`img/blue/random`&template=`imageTest`&altText=`[[++site_name]] picture`&titleText=`Guess what?`]]
+
+Dependencies: MODX Revolution 2.x +
+
+Variable lexicon
+
+Via Snippet call:
+     $altText (string)  text to be placed in the image alt tag
+     $bgPosition (string) can be one of: top left, top center, top right, center left,
+                       center center, center right, bottom left,
+                       bottom center, bottom right, random
+
+           `random` will change the background position to one of the allowed positions
+
+     $folder (string)   location on server of images to select from
+         (comma delimeted string) [[randomImages?folder=`img/blue/random, img/christian/random`&mode=`background`]]
+
+     $mode  (string)   image (default)
+               background of parent tag
+     $template (string)  uses a user created MODx Revolution Chunk
+     $titleText (string)  text to be placed in the image title tag
+
+
+ Snippet internal vars:
+     $i       (integer) simple counter -- holds current number of images found in directory
+     $imgDir   (directory handle resource)
+     $file_type  (string) returns every after the last occurrence of the provided seed: "."
+     $is_image   (string) returns an array with 7 elements
+     $output   (string  | bool) returns the output content or false
