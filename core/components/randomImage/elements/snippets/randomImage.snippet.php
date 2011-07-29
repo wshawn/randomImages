@@ -1,30 +1,15 @@
 <?php
 /**
- *  File    randomImages.snippet.php (MODX snippet)
+ *  File    randomImage.snippet.php (MODX snippet)
  * Created on  Nov 12, 2009
  * Project    shawn_wilkerson
- * @package    MODX Revolution Scripts
+ * @package    randomImage
  * @version    1.3
  * @category  randomization
  * @author    W. Shawn Wilkerson
  * @link    http://www.shawnwilkerson.com
  * @copyright  Copyright (c) 2009, W. Shawn Wilkerson.  All rights reserved.
- * @license
- *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any later
- * version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
- * Place, Suite 330, Boston, MA 02111-1307 USA
- *
+ */
 
 /**
  * define allowed template placeholders
@@ -104,7 +89,7 @@ if ($folder = !empty ($folder) ? $folder : false) {
          * This will always return alt="" at the minimum
          * Can be silently dropped for background applications
          */
-        $altText = ' alt="' . (!empty ($altText) ? '"' . $altText . '"' : '"');
+        $altText = ' alt="' . (!empty ($altText) ? $altText . '"' : '"');
         /**
          * title is always optional for images and can return an empty string
          */
@@ -122,7 +107,7 @@ if ($folder = !empty ($folder) ? $folder : false) {
                  */
                 $phArray = array(
                     $image_name,
-                    $imgSize[3],
+                    'width:' . $imgSize[0].'px; height:' . $imgSize[1] .'px;',
                     $altText,
                     $titleText,
                     $bgPosition
@@ -145,7 +130,7 @@ if ($folder = !empty ($folder) ? $folder : false) {
                 /**
                  * format a xhtml strict valid img tag
                  */
-                $output = '<img src="' . $image_name . '"' . $imgSize[3] . $altText . $titleText . ' />\n"';
+                $output = '<img src="' . $image_name . '" style="width:' . $imgSize[0].'px; height:' . $imgSize[1] .'px;" ' . $altText . ' ' . $titleText . ' />';
                 break;
         }
     }
