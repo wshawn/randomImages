@@ -1,15 +1,70 @@
 <?php
 /**
- *  File    randomImage.snippet.php (MODX snippet)
+ *  File    randomImages.php (MODx Revolution Snippet)
  * Created on  Nov 12, 2009
  * Project    shawn_wilkerson
- * @package    randomImage
- * @version    1.3
+ * @package    MODx Revolution Scripts
+ * @version    1.4
  * @category  randomization
  * @author    W. Shawn Wilkerson
  * @link    http://www.shawnwilkerson.com
  * @copyright  Copyright (c) 2009, W. Shawn Wilkerson.  All rights reserved.
- */
+ * @license
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation; either version 2 of the License, or (at your option) any later
+ * version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+ * Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ ************************************************
+ * Purpose: to access a user declared folder, select an image and display it
+ *
+ * Requirements: user must supply folder name in snippet call
+ *         use an image as a random img placed into the page located in the root of the site might be accessed via:
+ *         [[randomImages?folder=`img/blue/random`]] or [[randomImages?folder=`img/blue/random`&mode=`img`]]
+ *
+ *         use image as the background of an html object
+ *         <div id="header" [[randomImages?folder=`img/blue/random`&mode=`background`&bgPosition=`bottom left`]]>
+ *
+ *         use a modX chunk as a template:
+ *         [[randomImages?folder=`img/blue/random`&template=`imageTest`&altText=`[[++site_name]] picture`&titleText=`Guess what?`]]
+ *
+ * Dependencies: MODx Revolution 2.x +
+ *
+ *
+ * Variable lexicon
+ * Via Snippet call:
+ *     $altText (string)  text to be placed in the image alt tag
+ *     $bgPosition (string) can be one of: top left, top center, top right, center left,
+ *                       center center, center right, bottom left,
+ *                       bottom center, bottom right, random
+ *
+ *           `random` will change the background position to one of the allowed positions
+ *
+ *     $folder (string)   location on server of images to select from
+ *         (comma delimeted string) [[randomImages?folder=`img/blue/random, img/christian/random`&mode=`background`]]
+ *
+ *     $mode  (string)   image (default)
+ *               background of parent tag
+ *     $template (string)  uses a user created MODx Revolution Chunk
+ *     $titleText (string)  text to be placed in the image title tag
+ *
+ * Snippet internal vars:
+ *     $i       (integer) simple counter -- holds current number of images found in directory
+ *     $imgDir   (directory handle resource)
+ *     $file_type  (string) returns every after the last occurance of the provided seed: "."
+ *     $is_image   (string) returns an array with 7 elements
+ *     $output   (string  | bool) returns the output content or false
+ ************************************************/
 
 /**
  * define allowed template placeholders
@@ -64,14 +119,22 @@ if ($folder = !empty ($folder) ? $folder : false) {
      * with their respective paths
      */
     $files = array();
-    $location = preg_split("/[\s,]+/", $folder);
+    $locations = preg_split("/[\s,]+/", $folder);
     reset($location);
-    foreach ($location as $value) {
-        $dir = new DirectoryIterator($value);
-        foreach ($dir as $file) {
-            if (!$file->isDot() && !$file->isDir() && preg_match("/\.(gif|png|jpg)$/", $file->getFilename())) {
-                $files[] = $value . '/' . $file->getFilename();
+    foreach ($locations as $location) {
+        try
+        {
+            $iterator = new DirectoryIterator($location);
+            while ($iterator->valid()) {
+                if (!$iterator->isDot() && !$iterator->isDir() && preg_match("/\.(gif|png|jpg)$/", $iterator->getFilename())) {
+                    $files[] = $location . '/' . $iterator->getFilename();
+                }
+                $iterator->next();
             }
+        }
+        catch (Exception $ex)
+        {
+            return $ex;
         }
     }
     $cnt = count($files);
@@ -89,7 +152,7 @@ if ($folder = !empty ($folder) ? $folder : false) {
          * This will always return alt="" at the minimum
          * Can be silently dropped for background applications
          */
-        $altText = ' alt="' . (!empty ($altText) ? $altText . '"' : '"');
+        $altText = ' alt="' . (!empty ($altText) ? '"' . $altText . '"' : '"');
         /**
          * title is always optional for images and can return an empty string
          */
@@ -107,7 +170,7 @@ if ($folder = !empty ($folder) ? $folder : false) {
                  */
                 $phArray = array(
                     $image_name,
-                    'width:' . $imgSize[0].'px; height:' . $imgSize[1] .'px;',
+                    $imgSize[3],
                     $altText,
                     $titleText,
                     $bgPosition
@@ -130,10 +193,9 @@ if ($folder = !empty ($folder) ? $folder : false) {
                 /**
                  * format a xhtml strict valid img tag
                  */
-                $output = '<img src="' . $image_name . '" style="width:' . $imgSize[0].'px; height:' . $imgSize[1] .'px;" ' . $altText . ' ' . $titleText . ' />';
+                $output = '<img src="' . $image_name . '" ' . $imgSize[3] . $altText . $titleText . ' />';
                 break;
         }
     }
     return $output;
 }
-
