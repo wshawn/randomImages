@@ -120,7 +120,7 @@ if ($folder = !empty ($folder) ? $folder : false) {
      */
     $files = array();
     $locations = preg_split("/[\s,]+/", $folder);
-    reset($location);
+    reset($locations);
     foreach ($locations as $location) {
         try
         {
